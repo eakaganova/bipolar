@@ -38,6 +38,8 @@ copy .env.example .env
 python bot.py
 ```
 
+Render should use Python 3.11.9 from `runtime.txt`. Python 3.14 may try to build older scientific packages from source and make deploys look stuck.
+
 For local webhook testing, expose your local server with a tunnel and set `PUBLIC_BASE_URL` to the public HTTPS URL.
 
 ## Render Deployment

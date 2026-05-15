@@ -79,15 +79,15 @@ async def handle_other_messages(message: Message) -> None:
     await message.answer("Пока MVP работает с голосовыми сообщениями. Отправь voice message, и я его обработаю.")
 
 
-async def on_startup(bot_instance: Bot) -> None:
+async def on_startup() -> None:
     logger.info("Setting Telegram webhook: %s", settings.webhook_url)
-    await bot_instance.set_webhook(settings.webhook_url)
+    await bot.set_webhook(settings.webhook_url)
 
 
-async def on_shutdown(bot_instance: Bot) -> None:
+async def on_shutdown() -> None:
     logger.info("Deleting Telegram webhook and closing bot session")
-    await bot_instance.delete_webhook(drop_pending_updates=False)
-    await bot_instance.session.close()
+    await bot.delete_webhook(drop_pending_updates=False)
+    await bot.session.close()
 
 
 async def health_check(request: web.Request) -> web.Response:

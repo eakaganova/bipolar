@@ -7,7 +7,7 @@ This is not a medical device, does not diagnose, and does not replace a clinicia
 ## Architecture
 
 - `bot.py` - Telegram webhook server on `aiohttp`/`aiogram`, voice-message handling, user-facing statuses, graceful errors.
-- `llm.py` - OpenAI Whisper transcription, JSON-only metrics extraction, supportive reflection generation, retries.
+- `llm.py` - OpenAI Whisper or Yandex Realtime speech transcription, OpenAI or Yandex Cloud text LLM calls, JSON-only metrics extraction, supportive reflection generation, retries.
 - `analysis.py` - safe JSON extraction and Pydantic validation layer.
 - `sheets.py` - Google Sheets MVP database writer.
 - `prompts.py` - medical-safety and JSON-stability prompts.
@@ -52,10 +52,21 @@ For local webhook testing, expose your local server with a tunnel and set `PUBLI
 ## Required Environment Variables
 
 - `TELEGRAM_BOT_TOKEN`
-- `OPENAI_API_KEY`
 - `PUBLIC_BASE_URL`
 - `GOOGLE_SHEET_ID`
 - `GOOGLE_SERVICE_ACCOUNT_JSON` or `GOOGLE_SERVICE_ACCOUNT_FILE`
+
+For Yandex Cloud text generation, set:
+
+- `TRANSCRIPTION_PROVIDER=yandex`
+- `LLM_PROVIDER=yandex`
+- `YANDEX_CLOUD_FOLDER`
+- `YANDEX_CLOUD_API_KEY`
+- `YANDEX_CLOUD_MODEL=gpt-oss-120b/latest`
+- `YANDEX_SPEECH_MODEL=speech-realtime-250923/latest`
+- `YANDEX_REALTIME_WSS_URL=wss://llm.api.cloud.yandex.net/v1/realtime`
+
+When `TRANSCRIPTION_PROVIDER=yandex` and `LLM_PROVIDER=yandex`, `OPENAI_API_KEY` is not required. Telegram voice files are converted from OGG/Opus to LPCM with `ffmpeg`; Render installs it from `apt.txt`.
 
 ## Processing Flow
 

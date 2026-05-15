@@ -39,9 +39,13 @@ services:
         value: ru-RU
       - key: PUBLIC_BASE_URL
         sync: false
-      - key: GOOGLE_SHEET_ID
-        sync: false
-      - key: GOOGLE_WORKSHEET_NAME
-        value: entries
-      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+      - key: STORAGE_PROVIDER
+        value: github_csv
+      - key: GITHUB_REPO
+        value: eakaganova/bipolar
+      - key: GITHUB_BRANCH
+        value: data
+      - key: GITHUB_CSV_PATH
+        value: data/entries.csv
+      - key: GITHUB_TOKEN
         sync: false

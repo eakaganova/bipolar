@@ -1,12 +1,7 @@
 import asyncio
-import base64
-import json
 import logging
-import tempfile
-from pathlib import Path
 from typing import Awaitable, Callable, TypeVar
 
-import aiohttp
 from openai import AsyncOpenAI
 
 from analysis import EmotionalMetrics, metrics_to_json, validate_metrics
@@ -25,7 +20,6 @@ T = TypeVar("T")
 class LLMService:
     def __init__(self) -> None:
         self.settings = get_settings()
-        self.transcription_client = self._make_openai_client()
         self.openai_client = self._make_openai_client()
         self.yandex_client = self._make_yandex_client()
 
@@ -61,160 +55,6 @@ class LLMService:
                 if attempt < self.settings.max_retries:
                     await asyncio.sleep(1.5 * attempt)
         raise RuntimeError(f"{label} failed after retries") from last_error
-
-    async def transcribe_voice(self, audio_bytes: bytes, filename: str = "voice.ogg") -> str:
-        provider = self.settings.transcription_provider.lower().strip()
-        if provider == "yandex":
-            return await self._with_retries(
-                "yandex realtime transcription",
-                lambda: self._transcribe_voice_yandex_realtime(audio_bytes, filename),
-            )
-        return await self._with_retries(
-            "voice transcription",
-            lambda: self._transcribe_voice_openai(audio_bytes, filename),
-        )
-
-    async def _transcribe_voice_openai(self, audio_bytes: bytes, filename: str) -> str:
-        async def operation() -> str:
-            if self.transcription_client is None:
-                raise RuntimeError("OPENAI_API_KEY is required for Whisper voice transcription")
-
-            suffix = Path(filename).suffix or ".ogg"
-            with tempfile.NamedTemporaryFile(suffix=suffix) as audio_file:
-                audio_file.write(audio_bytes)
-                audio_file.flush()
-                with open(audio_file.name, "rb") as file_obj:
-                    transcript = await self.transcription_client.audio.transcriptions.create(
-                        model=self.settings.openai_transcription_model,
-                        file=file_obj,
-                        response_format="text",
-                    )
-            text = str(transcript).strip()
-            if not text:
-                raise ValueError("Empty transcription")
-            logger.info("Transcription completed, %s chars", len(text))
-            return text
-
-        return await operation()
-
-    async def _convert_to_pcm(self, audio_bytes: bytes, filename: str) -> bytes:
-        suffix = Path(filename).suffix or ".ogg"
-        with tempfile.NamedTemporaryFile(suffix=suffix) as input_file:
-            input_file.write(audio_bytes)
-            input_file.flush()
-            process = await asyncio.create_subprocess_exec(
-                "ffmpeg",
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-i",
-                input_file.name,
-                "-f",
-                "s16le",
-                "-acodec",
-                "pcm_s16le",
-                "-ac",
-                "1",
-                "-ar",
-                str(self.settings.yandex_speech_input_rate),
-                "pipe:1",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, stderr = await process.communicate()
-
-        if process.returncode != 0:
-            error = stderr.decode("utf-8", errors="ignore")
-            raise RuntimeError(f"ffmpeg audio conversion failed: {error}")
-        if not stdout:
-            raise RuntimeError("ffmpeg produced empty PCM audio")
-        return stdout
-
-    async def _transcribe_voice_yandex_realtime(self, audio_bytes: bytes, filename: str) -> str:
-        if not self.settings.yandex_cloud_api_key or not self.settings.yandex_cloud_folder:
-            raise RuntimeError("Set YANDEX_CLOUD_FOLDER and YANDEX_CLOUD_API_KEY for Yandex speech transcription")
-
-        pcm_audio = await self._convert_to_pcm(audio_bytes, filename)
-        model_url = f"{self.settings.yandex_realtime_wss_url}?model={self.settings.yandex_speech_model_uri}"
-        headers = {"Authorization": f"Api-Key {self.settings.yandex_cloud_api_key}"}
-        transcript_parts: list[str] = []
-        response_parts: list[str] = []
-
-        async with aiohttp.ClientSession() as session:
-            async with session.ws_connect(model_url, headers=headers, heartbeat=20.0) as ws:
-                logger.info("Connected to Yandex Realtime API for transcription")
-                await ws.send_json(
-                    {
-                        "type": "session.update",
-                        "session": {
-                            "instructions": (
-                                "You are a speech transcription service. Return only the verbatim "
-                                "transcript of the user's Russian audio. Do not add advice or comments."
-                            ),
-                            "output_modalities": ["text"],
-                            "audio": {
-                                "input": {
-                                    "format": {
-                                        "type": "audio/pcm",
-                                        "rate": self.settings.yandex_speech_input_rate,
-                                    },
-                                    "languages": [self.settings.yandex_speech_language],
-                                    "turn_detection": {
-                                        "type": "server_vad",
-                                        "threshold": 0.5,
-                                        "silence_duration_ms": 400,
-                                    },
-                                }
-                            },
-                        },
-                    }
-                )
-
-                chunk_size = self.settings.yandex_speech_input_rate
-                for offset in range(0, len(pcm_audio), chunk_size):
-                    chunk = pcm_audio[offset : offset + chunk_size]
-                    await ws.send_json(
-                        {
-                            "type": "input_audio_buffer.append",
-                            "audio": base64.b64encode(chunk).decode("ascii"),
-                        }
-                    )
-
-                await ws.send_json({"type": "input_audio_buffer.commit"})
-                await ws.send_json({"type": "response.create"})
-
-                deadline = asyncio.get_running_loop().time() + self.settings.request_timeout_seconds
-                while asyncio.get_running_loop().time() < deadline:
-                    timeout = max(0.1, deadline - asyncio.get_running_loop().time())
-                    msg = await ws.receive(timeout=timeout)
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        payload = json.loads(msg.data)
-                        event_type = payload.get("type")
-
-                        if event_type == "conversation.item.input_audio_transcription.completed":
-                            transcript = (payload.get("transcript") or "").strip()
-                            if transcript:
-                                transcript_parts.append(transcript)
-
-                        if event_type == "response.output_text.delta":
-                            delta = payload.get("delta") or ""
-                            if delta:
-                                response_parts.append(delta)
-
-                        if event_type in {"response.done", "response.completed"}:
-                            break
-
-                        if event_type == "error":
-                            raise RuntimeError(f"Yandex Realtime API error: {payload}")
-
-                    elif msg.type in {aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR}:
-                        break
-
-        text = " ".join(transcript_parts).strip() or "".join(response_parts).strip()
-        if not text:
-            raise RuntimeError("Yandex Realtime API returned empty transcription")
-        logger.info("Yandex transcription completed, %s chars", len(text))
-        return text
 
     async def _create_text_response(
         self,
@@ -256,11 +96,11 @@ class LLMService:
         )
         return (response.choices[0].message.content or "").strip()
 
-    async def analyze_transcript(self, transcript: str) -> EmotionalMetrics:
+    async def analyze_text(self, text: str) -> EmotionalMetrics:
         async def operation() -> EmotionalMetrics:
             content = await self._create_text_response(
                 system_prompt=ANALYSIS_SYSTEM_PROMPT,
-                user_prompt=ANALYSIS_USER_TEMPLATE.format(transcript=transcript),
+                user_prompt=ANALYSIS_USER_TEMPLATE.format(transcript=text),
                 temperature=0,
                 json_only=True,
             )
@@ -268,21 +108,21 @@ class LLMService:
             logger.info("Analysis completed: suicidality_flag=%s", metrics.suicidality_flag)
             return metrics
 
-        return await self._with_retries("transcript analysis", operation)
+        return await self._with_retries("text analysis", operation)
 
-    async def write_reflection(self, transcript: str, metrics: EmotionalMetrics) -> str:
+    async def write_reflection(self, text: str, metrics: EmotionalMetrics) -> str:
         async def operation() -> str:
-            text = await self._create_text_response(
+            response_text = await self._create_text_response(
                 system_prompt=REFLECTION_SYSTEM_PROMPT,
                 user_prompt=REFLECTION_USER_TEMPLATE.format(
-                    transcript=transcript,
+                    transcript=text,
                     metrics_json=metrics_to_json(metrics),
                 ),
                 temperature=0.6,
             )
-            if not text:
+            if not response_text:
                 raise ValueError("Empty reflection")
-            logger.info("Reflection completed, %s chars", len(text))
-            return text
+            logger.info("Reflection completed, %s chars", len(response_text))
+            return response_text
 
         return await self._with_retries("supportive reflection", operation)

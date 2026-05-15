@@ -9,7 +9,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 
 from config import configure_logging, get_settings
 from llm import LLMService
-from sheets import SheetsStorage
+from storage import EntryStorage
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ bot = Bot(token=settings.telegram_bot_token)
 dp = Dispatcher()
 router = Router()
 llm_service = LLMService()
-sheets_storage = SheetsStorage()
+entry_storage = EntryStorage()
 
 
 @router.message(CommandStart())
@@ -54,7 +54,7 @@ async def handle_voice(message: Message) -> None:
         metrics = await llm_service.analyze_transcript(transcript)
 
         await status_message.edit_text("сохраняю запись")
-        await sheets_storage.append_entry(
+        await entry_storage.append_entry(
             user_id=user.id,
             username=user.username,
             transcript=transcript,

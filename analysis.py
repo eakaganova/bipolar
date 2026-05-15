@@ -74,7 +74,7 @@ def validate_metrics(raw_text: str) -> EmotionalMetrics:
 
 
 def metrics_to_json(metrics: EmotionalMetrics) -> str:
-    return metrics.model_dump_json(ensure_ascii=False)
+    return json.dumps(metrics.model_dump(), ensure_ascii=False)
 
 
 def metrics_to_row(metrics: EmotionalMetrics) -> dict[str, Any]:

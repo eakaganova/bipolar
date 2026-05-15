@@ -64,15 +64,31 @@ async def handle_text(message: Message) -> None:
         metrics = await llm_service.analyze_text(text)
 
         await status_message.edit_text("\u0441\u043e\u0445\u0440\u0430\u043d\u044f\u044e \u0437\u0430\u043f\u0438\u0441\u044c")
-        await entry_storage.append_entry(
-            user_id=user.id,
-            username=user.username,
-            transcript=text,
-            metrics=metrics,
-        )
+        storage_saved = True
+        try:
+            await entry_storage.append_entry(
+                user_id=user.id,
+                username=user.username,
+                transcript=text,
+                metrics=metrics,
+            )
+        except Exception as storage_exc:
+            storage_saved = False
+            logger.exception("Storage failed for user_id=%s: %s", user.id, storage_exc)
 
         reflection = await llm_service.write_reflection(text, metrics)
         await status_message.delete()
+        if not storage_saved:
+            reflection = (
+                reflection
+                + "\n\n"
+                + "\u0417\u0430\u043f\u0438\u0441\u044c \u0441\u0435\u0439\u0447\u0430\u0441 "
+                + "\u043d\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u043b\u0430\u0441\u044c "
+                + "\u0438\u0437-\u0437\u0430 \u043e\u0448\u0438\u0431\u043a\u0438 "
+                + "\u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449\u0430, \u043d\u043e "
+                + "\u0430\u043d\u0430\u043b\u0438\u0437 \u043f\u043e \u0442\u0435\u043a\u0441\u0442\u0443 "
+                + "\u044f \u0441\u0434\u0435\u043b\u0430\u043b."
+            )
         await message.answer(reflection)
 
     except Exception as exc:

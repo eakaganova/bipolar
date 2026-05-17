@@ -31,6 +31,9 @@ HEADERS = [
     "social_activity",
     "spending_behavior",
     "cognitive_speed",
+    "confidence_level",
+    "needs_more_context",
+    "missing_context",
 ]
 
 
@@ -93,6 +96,9 @@ class EntryStorage:
             "social_activity": metrics.social_activity,
             "spending_behavior": metrics.spending_behavior,
             "cognitive_speed": metrics.cognitive_speed,
+            "confidence_level": metrics.confidence_level,
+            "needs_more_context": metrics.needs_more_context,
+            "missing_context": ", ".join(metrics.missing_context),
         }
 
     def _append_entry_local_csv(

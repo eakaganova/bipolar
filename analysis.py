@@ -9,19 +9,23 @@ logger = logging.getLogger(__name__)
 
 
 class EmotionalMetrics(BaseModel):
-    mood_score: int = Field(ge=1, le=10)
-    energy_score: int = Field(ge=1, le=10)
-    anxiety_score: int = Field(ge=1, le=10)
+    mood_score: int | None = Field(default=None, ge=1, le=10)
+    energy_score: int | None = Field(default=None, ge=1, le=10)
+    anxiety_score: int | None = Field(default=None, ge=1, le=10)
     sleep_hours: float | None = Field(default=None, ge=0, le=24)
-    activation_level: int = Field(ge=1, le=10)
-    depression_risk: int = Field(ge=1, le=10)
-    mania_risk: int = Field(ge=1, le=10)
+    activation_level: int | None = Field(default=None, ge=1, le=10)
+    depression_risk: int | None = Field(default=None, ge=1, le=10)
+    mania_risk: int | None = Field(default=None, ge=1, le=10)
     suicidality_flag: bool
     medication_mentions: list[str] = Field(default_factory=list)
     social_activity: str = ""
     spending_behavior: str = ""
-    cognitive_speed: int = Field(ge=1, le=10)
+    cognitive_speed: int | None = Field(default=None, ge=1, le=10)
     summary: str = ""
+    confidence_level: str = "low"
+    needs_more_context: bool = True
+    missing_context: list[str] = Field(default_factory=list)
+    follow_up_questions: list[str] = Field(default_factory=list)
 
     @field_validator("medication_mentions", mode="before")
     @classmethod
@@ -33,6 +37,23 @@ class EmotionalMetrics(BaseModel):
         if isinstance(value, list):
             return [str(item).strip() for item in value if str(item).strip()]
         return []
+
+    @field_validator("missing_context", "follow_up_questions", mode="before")
+    @classmethod
+    def normalize_string_list(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [value] if value.strip() else []
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        return []
+
+    @field_validator("confidence_level", mode="before")
+    @classmethod
+    def normalize_confidence(cls, value: Any) -> str:
+        text = str(value or "low").strip().lower()
+        return text if text in {"low", "medium", "high"} else "low"
 
     @field_validator("social_activity", "spending_behavior", "summary", mode="before")
     @classmethod

@@ -88,7 +88,26 @@ async def handle_text(message: Message) -> None:
         await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
         status_message = await message.answer("\u0430\u043d\u0430\u043b\u0438\u0437\u0438\u0440\u0443\u044e \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435")
 
-        metrics = await llm_service.analyze_text(text)
+        try:
+            metrics = await llm_service.analyze_text(text)
+        except Exception as analysis_exc:
+            logger.exception("Analysis failed for user_id=%s: %s", user.id, analysis_exc)
+            await status_message.delete()
+            await message.answer(
+                "\u041f\u043e \u044d\u0442\u043e\u043c\u0443 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044e "
+                "\u043f\u043e\u043a\u0430 \u043d\u0435 \u0445\u0432\u0430\u0442\u0430\u0435\u0442 "
+                "\u043d\u0430\u0434\u0451\u0436\u043d\u043e\u0433\u043e \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\u0430 "
+                "\u0434\u043b\u044f \u0430\u043d\u0430\u043b\u0438\u0437\u0430.\n\n"
+                "\u0427\u0442\u043e\u0431\u044b \u044f \u0442\u043e\u0447\u043d\u0435\u0435 "
+                "\u043e\u0442\u0441\u043b\u0435\u0434\u0438\u043b \u0434\u0438\u043d\u0430\u043c\u0438\u043a\u0443, "
+                "\u043d\u0430\u043f\u0438\u0448\u0438 \u0441\u0432\u043e\u0431\u043e\u0434\u043d\u043e "
+                "\u043f\u0430\u0440\u0443 \u0441\u0442\u0440\u043e\u043a: \u043a\u0430\u043a "
+                "\u0441\u043e \u0441\u043d\u043e\u043c, \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439, "
+                "\u0442\u0440\u0435\u0432\u043e\u0433\u043e\u0439 \u0438 \u0435\u0441\u0442\u044c "
+                "\u043b\u0438 \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u043c\u043f\u0443\u043b\u044c\u0441 "
+                "\u0447\u0442\u043e-\u0442\u043e \u0440\u0435\u0437\u043a\u043e \u043c\u0435\u043d\u044f\u0442\u044c."
+            )
+            return
 
         try:
             history = await entry_storage.get_recent_entries(user_id=user.id, limit=100)

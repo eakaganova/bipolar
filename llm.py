@@ -68,6 +68,12 @@ class LLMService:
         if provider == "yandex":
             if self.yandex_client is None:
                 raise RuntimeError("Set YANDEX_CLOUD_FOLDER and YANDEX_CLOUD_API_KEY for Yandex LLM")
+            if json_only:
+                system_prompt = (
+                    system_prompt
+                    + "\n\nCritical output rule: return a single raw JSON object only. "
+                    + "No prose, no markdown, no code fences, no explanation before or after JSON."
+                )
             response = await self.yandex_client.responses.create(
                 model=self.settings.yandex_model_uri,
                 temperature=temperature,
@@ -112,7 +118,39 @@ class LLMService:
             logger.info("Analysis completed: suicidality_flag=%s", metrics.suicidality_flag)
             return metrics
 
-        return await self._with_retries("text analysis", operation)
+        try:
+            return await self._with_retries("text analysis", operation)
+        except Exception as exc:
+            logger.exception("Structured analysis failed; falling back to low-confidence context request: %s", exc)
+            return EmotionalMetrics(
+                mood_score=None,
+                energy_score=None,
+                anxiety_score=None,
+                sleep_hours=None,
+                activation_level=None,
+                depression_risk=None,
+                mania_risk=None,
+                suicidality_flag=False,
+                medication_mentions=[],
+                social_activity="",
+                spending_behavior="",
+                cognitive_speed=None,
+                summary="Structured analysis failed; ask for more context.",
+                confidence_level="low",
+                needs_more_context=True,
+                missing_context=[
+                    "sleep",
+                    "energy",
+                    "anxiety",
+                    "impulsivity",
+                    "events before the state changed",
+                ],
+                follow_up_questions=[
+                    "Как ты спал(а) последние 1-3 ночи?",
+                    "Энергии сейчас больше, меньше или примерно как обычно?",
+                    "Есть ли импульс резко что-то менять, писать, покупать или принимать решения?",
+                ],
+            )
 
     async def write_reflection(self, text: str, metrics: EmotionalMetrics, history_context: str) -> str:
         async def operation() -> str:

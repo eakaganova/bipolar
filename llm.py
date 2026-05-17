@@ -73,7 +73,11 @@ class LLMService:
                 temperature=temperature,
                 instructions=system_prompt,
                 input=user_prompt,
-                max_output_tokens=900 if json_only else 500,
+                max_output_tokens=(
+                    self.settings.analysis_max_output_tokens
+                    if json_only
+                    else self.settings.reflection_max_output_tokens
+                ),
             )
             text = getattr(response, "output_text", "") or ""
             return text.strip()

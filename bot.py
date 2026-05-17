@@ -23,6 +23,32 @@ llm_service = LLMService()
 entry_storage = EntryStorage()
 
 
+TELEGRAM_MESSAGE_LIMIT = 3900
+
+
+def split_for_telegram(text: str, limit: int = TELEGRAM_MESSAGE_LIMIT) -> list[str]:
+    if len(text) <= limit:
+        return [text]
+
+    chunks: list[str] = []
+    remaining = text.strip()
+    while len(remaining) > limit:
+        split_at = remaining.rfind("\n\n", 0, limit)
+        if split_at == -1:
+            split_at = remaining.rfind("\n", 0, limit)
+        if split_at == -1:
+            split_at = remaining.rfind(" ", 0, limit)
+        if split_at == -1 or split_at < limit // 2:
+            split_at = limit
+
+        chunks.append(remaining[:split_at].strip())
+        remaining = remaining[split_at:].strip()
+
+    if remaining:
+        chunks.append(remaining)
+    return chunks
+
+
 START_TEXT = (
     "\u041f\u0440\u0438\u0432\u0435\u0442. \u041d\u0430\u043f\u0438\u0448\u0438 "
     "\u043c\u043d\u0435 \u043f\u0430\u0440\u0443 \u0444\u0440\u0430\u0437 "
@@ -100,7 +126,8 @@ async def handle_text(message: Message) -> None:
                 + "\u0430\u043d\u0430\u043b\u0438\u0437 \u043f\u043e \u0442\u0435\u043a\u0441\u0442\u0443 "
                 + "\u044f \u0441\u0434\u0435\u043b\u0430\u043b."
             )
-        await message.answer(reflection)
+        for chunk in split_for_telegram(reflection):
+            await message.answer(chunk)
 
     except Exception as exc:
         logger.exception("Text processing failed for user_id=%s: %s", user.id, exc)

@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     request_timeout_seconds: int = Field(default=60, alias="REQUEST_TIMEOUT_SECONDS")
     max_retries: int = Field(default=3, alias="MAX_RETRIES")
+    analysis_max_output_tokens: int = Field(default=900, alias="ANALYSIS_MAX_OUTPUT_TOKENS")
+    reflection_max_output_tokens: int = Field(default=1200, alias="REFLECTION_MAX_OUTPUT_TOKENS")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
     @property

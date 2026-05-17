@@ -1,3 +1,4 @@
 created_at,telegram_user_id,telegram_username,mood_score,energy_score,anxiety_score,sleep_hours,activation_level,depression_risk,mania_risk,suicidality_flag,medication_mentions,social_activity,spending_behavior,cognitive_speed
 2026-05-17T14:51:23.090736+00:00,266312716,eak_ka,4,3,5,3.0,3,5,2,False,,,,5
 2026-05-17T14:51:55.490094+00:00,266312716,eak_ka,5,3,5,3.0,3,5,2,False,,,,3
+2026-05-17T15:00:36.136407+00:00,266312716,eak_ka,5,5,5,,5,5,5,False,,,,5

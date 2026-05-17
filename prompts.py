@@ -182,4 +182,7 @@ Text entry:
 
 Structured metrics:
 {metrics_json}
+
+Previous-entry dynamics context:
+{history_context}
 """

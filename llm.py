@@ -110,13 +110,14 @@ class LLMService:
 
         return await self._with_retries("text analysis", operation)
 
-    async def write_reflection(self, text: str, metrics: EmotionalMetrics) -> str:
+    async def write_reflection(self, text: str, metrics: EmotionalMetrics, history_context: str) -> str:
         async def operation() -> str:
             response_text = await self._create_text_response(
                 system_prompt=REFLECTION_SYSTEM_PROMPT,
                 user_prompt=REFLECTION_USER_TEMPLATE.format(
                     transcript=text,
                     metrics_json=metrics_to_json(metrics),
+                    history_context=history_context,
                 ),
                 temperature=0.6,
             )

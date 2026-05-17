@@ -1,6 +1,6 @@
 # Bipolar Text Bot MVP
 
-Telegram MVP for text-first emotional self-observation. The user writes a short text message, the bot extracts structured metrics with an LLM, saves the entry to CSV storage, and returns a short supportive reflection.
+Telegram MVP for text-first emotional self-observation. The user writes a short text message, the bot extracts structured metrics with an LLM, saves only metrics to CSV storage, and returns a short supportive reflection.
 
 This is not a medical device, does not diagnose, and does not replace a clinician.
 
@@ -9,7 +9,7 @@ This is not a medical device, does not diagnose, and does not replace a clinicia
 - `bot.py` - Telegram webhook server, text-message handling, statuses, graceful errors.
 - `llm.py` - Yandex/OpenAI text LLM calls and retries.
 - `analysis.py` - safe JSON extraction and Pydantic validation layer.
-- `storage.py` - `github_csv` storage for Render and `local_csv` for local testing.
+- `storage.py` - `github_csv` storage for Render and `local_csv` for local testing. It stores metrics only, not the original user text.
 - `prompts.py` - safety and JSON-stability prompts.
 - `config.py` - environment variables and logging setup.
 
@@ -42,7 +42,7 @@ Use a private repository for real user entries because the CSV may contain sensi
 3. LLM returns JSON only.
 4. `analysis.py` validates the JSON.
 5. Bot changes status to `сохраняю запись`.
-6. Entry is appended to CSV storage.
+6. Metrics are appended to CSV storage. The original text is not saved.
 7. Second LLM writes a short empathetic response.
 8. Bot sends the response to the user.
 
@@ -65,10 +65,10 @@ python bot.py
 ## CSV Headers
 
 ```text
-created_at, telegram_user_id, telegram_username, transcript, mood_score, energy_score,
+created_at, telegram_user_id, telegram_username, mood_score, energy_score,
 anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk,
 suicidality_flag, medication_mentions, social_activity, spending_behavior,
-cognitive_speed, summary
+cognitive_speed
 ```
 
 ## Next Product Steps

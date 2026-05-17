@@ -8,6 +8,7 @@ from aiogram.types import Message
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from config import configure_logging, get_settings
+from dynamics import build_history_context
 from llm import LLMService
 from storage import EntryStorage
 
@@ -63,6 +64,16 @@ async def handle_text(message: Message) -> None:
 
         metrics = await llm_service.analyze_text(text)
 
+        try:
+            history = await entry_storage.get_recent_entries(user_id=user.id, limit=100)
+            history_context = build_history_context(history, metrics)
+        except Exception as history_exc:
+            logger.exception("History read failed for user_id=%s: %s", user.id, history_exc)
+            history_context = (
+                "Previous entries could not be loaded because storage history read failed. "
+                "Do not infer long-term dynamics; analyze only the current entry."
+            )
+
         await status_message.edit_text("\u0441\u043e\u0445\u0440\u0430\u043d\u044f\u044e \u0437\u0430\u043f\u0438\u0441\u044c")
         storage_saved = True
         try:
@@ -76,7 +87,7 @@ async def handle_text(message: Message) -> None:
             storage_saved = False
             logger.exception("Storage failed for user_id=%s: %s", user.id, storage_exc)
 
-        reflection = await llm_service.write_reflection(text, metrics)
+        reflection = await llm_service.write_reflection(text, metrics, history_context)
         await status_message.delete()
         if not storage_saved:
             reflection = (

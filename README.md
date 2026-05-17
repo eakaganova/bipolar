@@ -26,6 +26,7 @@ YANDEX_CLOUD_API_KEY=<api key>
 YANDEX_CLOUD_MODEL=gpt-oss-120b/latest
 YANDEX_CLOUD_BASE_URL=https://ai.api.cloud.yandex.net/v1
 REFLECTION_MAX_OUTPUT_TOKENS=1200
+DEBUG_ERRORS=false
 
 STORAGE_PROVIDER=github_csv
 GITHUB_REPO=eakaganova/bipolar

@@ -64,6 +64,11 @@ def build_history_context(history: list[dict[str, Any]], current_metrics: Emotio
     lines = [f"Previous entries available: {len(history)}."]
 
     latest = history[-1]
+    last_question = str(latest.get("bot_question", "")).strip()
+    if last_question:
+        lines.append(f"Last question the bot asked the user: {last_question}")
+        lines.append("The current user message may be an answer to that question. Use it as dialogue continuity if relevant.")
+
     lines.append("Current entry compared with the latest previous entry:")
     for field in NUMERIC_FIELDS:
         previous_value = _to_float(latest.get(field))

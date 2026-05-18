@@ -49,6 +49,26 @@ def split_for_telegram(text: str, limit: int = TELEGRAM_MESSAGE_LIMIT) -> list[s
     return chunks
 
 
+def extract_bot_question(text: str) -> str:
+    marker = "\u0412\u043e\u043f\u0440\u043e\u0441"
+    index = text.rfind(marker)
+    if index == -1:
+        return ""
+
+    question_block = text[index + len(marker) :].strip()
+    if question_block.startswith(":"):
+        question_block = question_block[1:].strip()
+
+    lines = [line.strip() for line in question_block.splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    question = lines[0]
+    if question.lower().startswith("\u0432\u043e\u043f\u0440\u043e\u0441:"):
+        question = question.split(":", 1)[1].strip()
+    return question[:300]
+
+
 START_TEXT = (
     "\u041f\u0440\u0438\u0432\u0435\u0442. \u041d\u0430\u043f\u0438\u0448\u0438 "
     "\u043c\u043d\u0435 \u043f\u0430\u0440\u0443 \u0444\u0440\u0430\u0437 "
@@ -119,6 +139,9 @@ async def handle_text(message: Message) -> None:
                 "Do not infer long-term dynamics; analyze only the current entry."
             )
 
+        reflection = await llm_service.write_reflection(text, metrics, history_context)
+        bot_question = extract_bot_question(reflection)
+
         await status_message.edit_text("\u0441\u043e\u0445\u0440\u0430\u043d\u044f\u044e \u0437\u0430\u043f\u0438\u0441\u044c")
         storage_saved = True
         try:
@@ -127,12 +150,12 @@ async def handle_text(message: Message) -> None:
                 username=user.username,
                 transcript=text,
                 metrics=metrics,
+                bot_question=bot_question,
             )
         except Exception as storage_exc:
             storage_saved = False
             logger.exception("Storage failed for user_id=%s: %s", user.id, storage_exc)
 
-        reflection = await llm_service.write_reflection(text, metrics, history_context)
         await status_message.delete()
         if not storage_saved:
             reflection = (

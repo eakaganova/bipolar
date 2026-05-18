@@ -45,6 +45,7 @@ HEADERS = [
     "protective_actions",
     "warning_signs",
     "pattern_hypothesis",
+    "bot_question",
 ]
 
 
@@ -58,13 +59,14 @@ class EntryStorage:
         username: str | None,
         transcript: str,
         metrics: EmotionalMetrics,
+        bot_question: str | None = None,
     ) -> None:
         provider = self.settings.storage_provider.lower().strip()
         if provider == "github_csv":
-            await self._append_entry_github_csv(user_id, username, transcript, metrics)
+            await self._append_entry_github_csv(user_id, username, transcript, metrics, bot_question)
             return
         if provider == "local_csv":
-            await asyncio.to_thread(self._append_entry_local_csv, user_id, username, transcript, metrics)
+            await asyncio.to_thread(self._append_entry_local_csv, user_id, username, transcript, metrics, bot_question)
             return
         raise ValueError("Set STORAGE_PROVIDER to github_csv or local_csv")
 
@@ -90,6 +92,7 @@ class EntryStorage:
         username: str | None,
         transcript: str,
         metrics: EmotionalMetrics,
+        bot_question: str | None = None,
     ) -> dict[str, Any]:
         return {
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -121,6 +124,7 @@ class EntryStorage:
             "protective_actions": ", ".join(metrics.protective_actions),
             "warning_signs": ", ".join(metrics.warning_signs),
             "pattern_hypothesis": metrics.pattern_hypothesis,
+            "bot_question": bot_question or "",
         }
 
     def _append_entry_local_csv(
@@ -129,11 +133,12 @@ class EntryStorage:
         username: str | None,
         transcript: str,
         metrics: EmotionalMetrics,
+        bot_question: str | None = None,
     ) -> None:
         path = Path(self.settings.local_csv_path)
         path.parent.mkdir(parents=True, exist_ok=True)
         existing_rows = self._read_local_csv()
-        existing_rows.append(self._entry_dict(user_id, username, transcript, metrics))
+        existing_rows.append(self._entry_dict(user_id, username, transcript, metrics, bot_question))
         with path.open("w", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=HEADERS)
             writer.writeheader()
@@ -182,6 +187,7 @@ class EntryStorage:
         username: str | None,
         transcript: str,
         metrics: EmotionalMetrics,
+        bot_question: str | None = None,
     ) -> None:
         if not self.settings.github_token or not self.settings.github_repo:
             raise ValueError("Set GITHUB_TOKEN and GITHUB_REPO for github_csv storage")
@@ -209,7 +215,7 @@ class EntryStorage:
                     raise RuntimeError(f"GitHub CSV read failed: {response.status} {text}")
 
             existing_rows = list(csv.DictReader(io.StringIO(current_csv))) if current_csv.strip() else []
-            existing_rows.append(self._entry_dict(user_id, username, transcript, metrics))
+            existing_rows.append(self._entry_dict(user_id, username, transcript, metrics, bot_question))
 
             output = io.StringIO()
             writer = csv.DictWriter(output, fieldnames=HEADERS)

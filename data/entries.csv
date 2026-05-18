@@ -11,3 +11,4 @@ created_at,telegram_user_id,telegram_username,mood_score,energy_score,anxiety_sc
 2026-05-17T15:37:07.283746+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
 2026-05-18T07:13:54.206200+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
 2026-05-18T07:15:25.271687+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"mood_score, energy_score, anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk, cognitive_speed, medication_mentions, social_activity, spending_behavior"
+2026-05-18T07:16:29.304815+00:00,266312716,eak_ka,3,,4,,,,,False,,,,,low,True,"energy_score, sleep_hours, activation_level, depression_risk, mania_risk, medication_mentions, social_activity, spending_behavior, cognitive_speed"

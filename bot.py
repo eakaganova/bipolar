@@ -197,8 +197,7 @@ async def on_startup() -> None:
 
 
 async def on_shutdown() -> None:
-    logger.info("Deleting Telegram webhook and closing bot session")
-    await bot.delete_webhook(drop_pending_updates=False)
+    logger.info("Closing bot session without deleting Telegram webhook")
     await bot.session.close()
 
 

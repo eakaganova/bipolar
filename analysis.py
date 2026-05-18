@@ -26,6 +26,17 @@ class EmotionalMetrics(BaseModel):
     needs_more_context: bool = True
     missing_context: list[str] = Field(default_factory=list)
     follow_up_questions: list[str] = Field(default_factory=list)
+    sleep_pattern: str = ""
+    appetite_pattern: str = ""
+    irritability_signs: str = ""
+    thought_speed_signs: str = ""
+    impulsivity_signs: str = ""
+    productivity_pattern: str = ""
+    body_state: str = ""
+    trigger_events: list[str] = Field(default_factory=list)
+    protective_actions: list[str] = Field(default_factory=list)
+    warning_signs: list[str] = Field(default_factory=list)
+    pattern_hypothesis: str = ""
 
     @field_validator("medication_mentions", mode="before")
     @classmethod
@@ -38,7 +49,14 @@ class EmotionalMetrics(BaseModel):
             return [str(item).strip() for item in value if str(item).strip()]
         return []
 
-    @field_validator("missing_context", "follow_up_questions", mode="before")
+    @field_validator(
+        "missing_context",
+        "follow_up_questions",
+        "trigger_events",
+        "protective_actions",
+        "warning_signs",
+        mode="before",
+    )
     @classmethod
     def normalize_string_list(cls, value: Any) -> list[str]:
         if value is None:
@@ -55,7 +73,20 @@ class EmotionalMetrics(BaseModel):
         text = str(value or "low").strip().lower()
         return text if text in {"low", "medium", "high"} else "low"
 
-    @field_validator("social_activity", "spending_behavior", "summary", mode="before")
+    @field_validator(
+        "social_activity",
+        "spending_behavior",
+        "summary",
+        "sleep_pattern",
+        "appetite_pattern",
+        "irritability_signs",
+        "thought_speed_signs",
+        "impulsivity_signs",
+        "productivity_pattern",
+        "body_state",
+        "pattern_hypothesis",
+        mode="before",
+    )
     @classmethod
     def normalize_text(cls, value: Any) -> str:
         return "" if value is None else str(value).strip()

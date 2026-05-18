@@ -70,7 +70,10 @@ python bot.py
 created_at, telegram_user_id, telegram_username, mood_score, energy_score,
 anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk,
 suicidality_flag, medication_mentions, social_activity, spending_behavior,
-cognitive_speed
+cognitive_speed, confidence_level, needs_more_context, missing_context,
+sleep_pattern, appetite_pattern, irritability_signs, thought_speed_signs,
+impulsivity_signs, productivity_pattern, body_state, trigger_events,
+protective_actions, warning_signs, pattern_hypothesis
 ```
 
 ## Next Product Steps

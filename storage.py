@@ -34,6 +34,17 @@ HEADERS = [
     "confidence_level",
     "needs_more_context",
     "missing_context",
+    "sleep_pattern",
+    "appetite_pattern",
+    "irritability_signs",
+    "thought_speed_signs",
+    "impulsivity_signs",
+    "productivity_pattern",
+    "body_state",
+    "trigger_events",
+    "protective_actions",
+    "warning_signs",
+    "pattern_hypothesis",
 ]
 
 
@@ -99,6 +110,17 @@ class EntryStorage:
             "confidence_level": metrics.confidence_level,
             "needs_more_context": metrics.needs_more_context,
             "missing_context": ", ".join(metrics.missing_context),
+            "sleep_pattern": metrics.sleep_pattern,
+            "appetite_pattern": metrics.appetite_pattern,
+            "irritability_signs": metrics.irritability_signs,
+            "thought_speed_signs": metrics.thought_speed_signs,
+            "impulsivity_signs": metrics.impulsivity_signs,
+            "productivity_pattern": metrics.productivity_pattern,
+            "body_state": metrics.body_state,
+            "trigger_events": ", ".join(metrics.trigger_events),
+            "protective_actions": ", ".join(metrics.protective_actions),
+            "warning_signs": ", ".join(metrics.warning_signs),
+            "pattern_hypothesis": metrics.pattern_hypothesis,
         }
 
     def _append_entry_local_csv(

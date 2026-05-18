@@ -150,6 +150,17 @@ class LLMService:
                     "Энергии сейчас больше, меньше или примерно как обычно?",
                     "Есть ли импульс резко что-то менять, писать, покупать или принимать решения?",
                 ],
+                sleep_pattern="not described",
+                appetite_pattern="not described",
+                irritability_signs="not described",
+                thought_speed_signs="not described",
+                impulsivity_signs="not described",
+                productivity_pattern="not described",
+                body_state="not described",
+                trigger_events=[],
+                protective_actions=[],
+                warning_signs=[],
+                pattern_hypothesis="insufficient context",
             )
 
     async def write_reflection(self, text: str, metrics: EmotionalMetrics, history_context: str) -> str:

@@ -15,6 +15,20 @@ NUMERIC_FIELDS = [
     "cognitive_speed",
 ]
 
+PATTERN_FIELDS = [
+    "sleep_pattern",
+    "appetite_pattern",
+    "irritability_signs",
+    "thought_speed_signs",
+    "impulsivity_signs",
+    "productivity_pattern",
+    "body_state",
+    "trigger_events",
+    "protective_actions",
+    "warning_signs",
+    "pattern_hypothesis",
+]
+
 
 def _to_float(value: Any) -> float | None:
     if value in (None, ""):
@@ -87,5 +101,20 @@ def build_history_context(history: list[dict[str, Any]], current_metrics: Emotio
                 continue
             delta = mean(recent_values) - mean(older_values)
             lines.append(f"- {field}: recent average shifted by {_format_delta(delta)}.")
+
+    pattern_lines = []
+    for row in history[-10:]:
+        parts = []
+        for field in PATTERN_FIELDS:
+            value = str(row.get(field, "")).strip()
+            if value:
+                parts.append(f"{field}={value[:120]}")
+        if parts:
+            pattern_lines.append("; ".join(parts))
+
+    if pattern_lines:
+        lines.append("Recent structured symptom/pattern notes from previous entries:")
+        for line in pattern_lines[-5:]:
+            lines.append(f"- {line}")
 
     return "\n".join(lines)

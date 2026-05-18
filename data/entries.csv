@@ -1,15 +1,16 @@
-created_at,telegram_user_id,telegram_username,mood_score,energy_score,anxiety_score,sleep_hours,activation_level,depression_risk,mania_risk,suicidality_flag,medication_mentions,social_activity,spending_behavior,cognitive_speed,confidence_level,needs_more_context,missing_context
-2026-05-17T14:51:23.090736+00:00,266312716,eak_ka,4,3,5,3.0,3,5,2,False,,,,5,,,
-2026-05-17T14:51:55.490094+00:00,266312716,eak_ka,5,3,5,3.0,3,5,2,False,,,,3,,,
-2026-05-17T15:00:36.136407+00:00,266312716,eak_ka,5,5,5,,5,5,5,False,,,,5,,,
-2026-05-17T15:09:43.313947+00:00,266312716,eak_ka,4,3,5,3.0,3,5,2,False,,doctor visit,,5,,,
-2026-05-17T15:17:03.041925+00:00,266312716,eak_ka,,,,3.0,,,,False,,,,,low,True,"mood_score, energy_score, anxiety_score, activation_level, depression_risk, mania_risk, cognitive_speed, social_activity, spending_behavior"
-2026-05-17T15:17:53.983715+00:00,266312716,eak_ka,5,4,,,,,,False,,,,,medium,True,"anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk, social_activity, spending_behavior, cognitive_speed"
-2026-05-17T15:30:49.697897+00:00,266312716,eak_ka,,,,9.0,8,,,False,,,,,medium,True,"mood_score, energy_score, anxiety_score, depression_risk, mania_risk, social_activity, spending_behavior, cognitive_speed"
-2026-05-17T15:31:01.620832+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
-2026-05-17T15:36:14.795860+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
-2026-05-17T15:37:07.283746+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
-2026-05-18T07:13:54.206200+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed"
-2026-05-18T07:15:25.271687+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"mood_score, energy_score, anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk, cognitive_speed, medication_mentions, social_activity, spending_behavior"
-2026-05-18T07:16:29.304815+00:00,266312716,eak_ka,3,,4,,,,,False,,,,,low,True,"energy_score, sleep_hours, activation_level, depression_risk, mania_risk, medication_mentions, social_activity, spending_behavior, cognitive_speed"
-2026-05-18T07:24:08.059784+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"mood, energy, anxiety, sleep duration, activation level, depression risk, mania risk, cognitive speed, social activity, spending behavior, medication use"
+created_at,telegram_user_id,telegram_username,mood_score,energy_score,anxiety_score,sleep_hours,activation_level,depression_risk,mania_risk,suicidality_flag,medication_mentions,social_activity,spending_behavior,cognitive_speed,confidence_level,needs_more_context,missing_context,sleep_pattern,appetite_pattern,irritability_signs,thought_speed_signs,impulsivity_signs,productivity_pattern,body_state,trigger_events,protective_actions,warning_signs,pattern_hypothesis
+2026-05-17T14:51:23.090736+00:00,266312716,eak_ka,4,3,5,3.0,3,5,2,False,,,,5,,,,,,,,,,,,,,
+2026-05-17T14:51:55.490094+00:00,266312716,eak_ka,5,3,5,3.0,3,5,2,False,,,,3,,,,,,,,,,,,,,
+2026-05-17T15:00:36.136407+00:00,266312716,eak_ka,5,5,5,,5,5,5,False,,,,5,,,,,,,,,,,,,,
+2026-05-17T15:09:43.313947+00:00,266312716,eak_ka,4,3,5,3.0,3,5,2,False,,doctor visit,,5,,,,,,,,,,,,,,
+2026-05-17T15:17:03.041925+00:00,266312716,eak_ka,,,,3.0,,,,False,,,,,low,True,"mood_score, energy_score, anxiety_score, activation_level, depression_risk, mania_risk, cognitive_speed, social_activity, spending_behavior",,,,,,,,,,,
+2026-05-17T15:17:53.983715+00:00,266312716,eak_ka,5,4,,,,,,False,,,,,medium,True,"anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk, social_activity, spending_behavior, cognitive_speed",,,,,,,,,,,
+2026-05-17T15:30:49.697897+00:00,266312716,eak_ka,,,,9.0,8,,,False,,,,,medium,True,"mood_score, energy_score, anxiety_score, depression_risk, mania_risk, social_activity, spending_behavior, cognitive_speed",,,,,,,,,,,
+2026-05-17T15:31:01.620832+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed",,,,,,,,,,,
+2026-05-17T15:36:14.795860+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed",,,,,,,,,,,
+2026-05-17T15:37:07.283746+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed",,,,,,,,,,,
+2026-05-18T07:13:54.206200+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed",,,,,,,,,,,
+2026-05-18T07:15:25.271687+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"mood_score, energy_score, anxiety_score, sleep_hours, activation_level, depression_risk, mania_risk, cognitive_speed, medication_mentions, social_activity, spending_behavior",,,,,,,,,,,
+2026-05-18T07:16:29.304815+00:00,266312716,eak_ka,3,,4,,,,,False,,,,,low,True,"energy_score, sleep_hours, activation_level, depression_risk, mania_risk, medication_mentions, social_activity, spending_behavior, cognitive_speed",,,,,,,,,,,
+2026-05-18T07:24:08.059784+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"mood, energy, anxiety, sleep duration, activation level, depression risk, mania risk, cognitive speed, social activity, spending behavior, medication use",,,,,,,,,,,
+2026-05-18T07:29:46.580355+00:00,266312716,eak_ka,,,,,,,,False,,,,,low,True,"sleep, energy, anxiety, impulsivity, events before the state changed",not described,not described,not described,not described,not described,not described,not described,,,,insufficient context
